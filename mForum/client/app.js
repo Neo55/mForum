@@ -1,4 +1,4 @@
-angular.module('forum', ['angular-meteor', 'ui.router'])
+angular.module('forum', ['angular-meteor', 'ui.router', 'accounts.ui'])
 
 .config(function($urlRouterProvider, $stateProvider){
 
@@ -34,11 +34,43 @@ angular.module('forum', ['angular-meteor', 'ui.router'])
         });
     })
 
-.controller('TopiController', function($scope, $stateParams){
+    .controller('TopicContoller', function($scope, $stateParams, $meteor){
         $scope.subscribe('topic', function(){ return [$stateParams.topicId]; });
+        $scope.subscribe('threads', function(){ return [$stateParams.topicId]; });
         $scope.helpers({
-            topic: function(){
+            topic: function() {
                 return Topics.findOne({_id: $stateParams.topicId});
+            },
+            threads: function() {
+                return Threads.find({topicId: $stateParams.topicId});
             }
         });
+        $scope.createThread = function(thread){
+            $meteor.call("createThread", $stateParams.topicId, thread.content).then(function(){
+                thread.content = '';
+            }).catch(function(){
+                alert("An error occured while creating the thread!");
+            });
+        };
     })
+
+
+//.controller('TopicController', function($scope, $stateParams, $meteor){
+        //$scope.subscribe('topic', function(){ return [$stateParams.topicId]; });
+        //$scope.subscribe('threads', function(){ return [$stateParams.topicId]; });
+        //$scope.helpers({
+            //topic: function(){
+            //    return Topics.findOne({_id: $stateParams.topicId});
+            //},
+            //threads: function(){
+            //    return Threads.find({topicId: $stateParams.topicId});
+          //  }
+        //});
+        //$scope.createThread = function(thread){
+        //    $meteor.call("createThread", $stateParams.topicId, thread.content).then(function(){
+        //        thread.content = '';
+        //    }).catch(function(){
+        //        alert("An error occured while creating the thread")
+        //    });
+       // };
+    //})
